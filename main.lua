@@ -1,18 +1,49 @@
 dofile("evo/std.lua")
-
 dofile("evo/point.lua")
-test_point()
-
 dofile("evo/functional.lua")
-test_functional()
-
 dofile("evo/tp_map.lua")
-
 dofile("evo/tp_wrapper.lua")
 
 
 
 
+
+function on_map_load(map, money)
+	g_available_passengers = {}
+	-- rememberMap = nil
+
+	buyTrain(3,1)
+
+
+	local pt_map = create_point_map(map)
+	debug_print_loc("on_map_load")
+
+
+	local tmap = create_typed_rails(pt_map)
+
+	local is_junction = function(k,v)
+		return v=="J"
+	end
+
+	local junctions = filter(tmap.points, is_junction)
+
+	debug = 1
+	if debug == 1 then
+		print "DEBUG:Junctions"
+		table.print(junctions)
+		print "----"
+	end
+	debug_print_loc("on_map_load")
+
+	for _,v in pairs( possible_moves(tmap.points, Point.new(4,1) ) ) do
+		print( Point.dir_str( v ) )
+	end
+
+end
+
+function debug_print_loc(function_name)
+	print( function_name .. " - LOC used - " .. getNumberOfLines() )
+end
 
 
 
@@ -26,8 +57,7 @@ function on_junction( train, possibleDirections )
 		return directionToPassanger(train, possibleDirections)
 		--return chooseRandom(possibleDirections)
 	else
-
-		res = directionToDestination(train, possibleDirections)
+		local res = directionToDestination(train, possibleDirections)
 		-- print("ai.chooseDirection: use directionToDestination :" .. res)
 		return res
 	end
@@ -45,8 +75,8 @@ function directionToPassanger(train, possibleDirections)
 		return "E"
 	end
 	local destination_dir = calc_direction(
-			point(train.x, train.y)
-			,point(pass.x, pass.y)
+			Point.new(train.x, train.y)
+			,Point.new(pass.x, pass.y)
 			)
 
 	local dim, dir, res
@@ -61,8 +91,8 @@ end
 
 function directionToDestination(train, possibleDirections)
 	local destination_dir = calc_direction(
-			point(train.x, train.y)
-			,point(train.passenger.destX, train.passenger.destY)
+			Point.new(train.x, train.y)
+			,Point.new(train.passenger.destX, train.passenger.destY)
 			)
 
 	local dim, dir, res
@@ -85,7 +115,7 @@ function on_passangers_found(train, passengers)
 
 	local pass = min(passengers, calc_distance)
 
-	g_available_passengers[pass.name] = nil
+	g_available_passengers[pass.name] = nil -- customer is not available for pick anymore
 
 	return pass
 end
@@ -95,8 +125,8 @@ function find_closest_customer()
 	local calc_customers_travel_distance =
 		function(some_passanger)
 			return calc_distance(
-				point(some_passanger.x, some_passanger.y)
-				,point(some_passanger.destX, some_passanger.destY)
+				Point.new(some_passanger.x, some_passanger.y)
+				,Point.new(some_passanger.destX, some_passanger.destY)
 				)
 		end
 
@@ -104,20 +134,7 @@ function find_closest_customer()
 end
 
 
-function on_map_load(map, money)
-	g_available_passengers = {}
- 	-- rememberMap = nil
 
-	buyTrain(3,1)
-
-	printMap(map)
-	print "----"
-
-	print(is_junction(map,point(4,4)))
-	print(is_junction(map,point(7,6)))
-	print(is_junction(map,point(6,6)))
-	 -- printMap2(create_point_map(map))
-end
 
 
 function on_passanger_appeared(name, x, y, destX, destY)
@@ -147,23 +164,23 @@ end
 
 
 function chooseRandom(possibleDirections)
-     local dirTable = {}
-     if possibleDirections["N"] then
-         table.insert(dirTable, "N")
-     end
-     if possibleDirections["S"] then
-         table.insert(dirTable, "S")
-     end
-     if possibleDirections["E"] then
-         table.insert(dirTable, "E")
-     end
-     if possibleDirections["W"] then
-         table.insert(dirTable, "W")
-     end
+	 local dirTable = {}
+	 if possibleDirections["N"] then
+		 table.insert(dirTable, "N")
+	 end
+	 if possibleDirections["S"] then
+		 table.insert(dirTable, "S")
+	 end
+	 if possibleDirections["E"] then
+		 table.insert(dirTable, "E")
+	 end
+	 if possibleDirections["W"] then
+		 table.insert(dirTable, "W")
+	 end
 
-     res = dirTable[random(#dirTable)]
-     --print("random chose " .. res)
-     return res
+	 res = dirTable[random(#dirTable)]
+	 --print("random chose " .. res)
+	 return res
 end
 
 
