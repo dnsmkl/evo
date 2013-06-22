@@ -7,7 +7,33 @@ function PathFind.find( rail_start, rail_finish )
 	if rail_finish.direction_count > 2 then
 		return PathFind.junction_find( rail_start, rail_finish )
 	else
-		-- for rail_finish
+		local mini_open_set = Set.new()
+		for _,dir in pairs(rail_finish.directions) do
+
+			local junction = dir.next_junction
+			local till_junction = PathFind.junction_find( rail_start, junction )
+
+			local corresponds_to_final_rail = function(dir)
+				for _,d in pairs(rail_finish.directions) do
+					if d.next_junction == dir.next_junction
+						and Dir.has_rail( dir, rail_finish ) then
+						return true
+					end
+				end
+				return false
+			end
+			local good_dir = Fn.filter(junction.directions, corresponds_to_final_rail)
+			assert( #good_dir == 0 )
+			_,good_dir = next(good_dir)
+
+			Path.append( till_junction, good_dir )
+
+			Path.set_early_finish( till_junction, rail_finish )
+			Set.append( mini_open_set, till_junction )
+		end
+
+		local fn_shortest_distance = function( path ) return ( -path.distance ) end -- smaller distance results in higher score
+		return Fn.choose( Set.as_array( mini_open_set ), fn_shortest_distance )
 	end
 end
 
@@ -79,18 +105,31 @@ end
 
 function PathFind.test()
 	local rail_21 = _GET_rail(2,1)
-	local manualy_built_path = Path.new( rail_21 )
 
-	local pf_same = PathFind.junction_find( rail_21, rail_21 )
+	-- test junction_find
+	local pfj_same = PathFind.junction_find( rail_21, rail_21 )
+	assert( Path.str( pfj_same ) == "|2;1|  : 0" )
+
+	local pfj_next_junction = PathFind.junction_find( rail_21, _GET_rail(6,1) )
+	assert( Path.str( pfj_next_junction ) == "|2;1;E|  ->  |6;1|  : 4","shortest path to next junction is incorrect" )
+
+	local pfj_further_junction = PathFind.junction_find( _GET_rail(2,1), _GET_rail(6,3) )
+	assert( Path.str( pfj_further_junction ) == "|2;1;E|  ->  |6;1;S|  ->  |6;3|  : 6", "was calculated:" .. Path.str( pfj_further_junction ) )
+
+	-- test find
+	local pf_same = PathFind.find( rail_21, rail_21 )
 	assert( Path.str( pf_same ) == "|2;1|  : 0" )
 
-	local pf_next_junction = PathFind.junction_find( rail_21, _GET_rail(6,1) )
-	assert( Path.str( pf_next_junction ) == "|2;1;E|  ->  |6;1|  : 4","shortest path to next junction is incorrect" )
-
-	local pf_further_junction = PathFind.junction_find( _GET_rail(2,1), _GET_rail(6,3) )
+	local pf_further_junction = PathFind.find( _GET_rail(2,1), _GET_rail(6,3) )
 	assert( Path.str( pf_further_junction ) == "|2;1;E|  ->  |6;1;S|  ->  |6;3|  : 6", "was calculated:" .. Path.str( pf_further_junction ) )
 
+
+	local pf_not_junction = PathFind.find( _GET_rail(2,1), _GET_rail(7,1) )
+	assert( Path.str( pf_not_junction ) == "|2;1;E|  ->  |6;1;E|  ->  |7;1|  : 5", "was calculated:" .. Path.str( pf_not_junction ) )
+
+	local pf_deadend = PathFind.find( _GET_rail(7,1), _GET_rail(1,1) )
+	assert( Path.str( pf_deadend ) == "|7;1;W|  ->  |6;1;W|  ->  |2;1;W|  ->  |1;1|  : 6", "was calculated:" .. Path.str( pf_deadend ) )
 end
 
- PathFind.test()
+PathFind.test()
 

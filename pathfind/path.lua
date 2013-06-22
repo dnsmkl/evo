@@ -27,6 +27,13 @@ function Path.append( path, dir )
 	path.distance = path.distance + dir.dist_junction
 end
 
+function Path.set_early_finish( path, dest_rail )
+	local final_dir = path.dirs[#path.dirs]
+
+	path.distance = path.distance - final_dir.dist_junction -- remove final road till junction
+	path.distance = path.distance + Dir.get_distance( final_dir, dest_rail ) -- append only part till dest_rail
+	path.destination = dest_rail
+end
 
 
 
@@ -128,10 +135,20 @@ function Path.test()
 	Path.append( p5 , _GET_dir(6,1,"E") )
 	assert( Path.str( p4 ) == "|2;1;E|  ->  |6;1|  : 4" )
 	assert( Path.str( p5 ) == "|2;1;E|  ->  |6;1;E|  ->  |6;3|  : 12", "result was:" .. Path.str( p5 ) )
-
 	-- TEST Path.has_rail
 	assert( Path.has_rail( p5, _GET_rail( 2,1 ) ) )
 	assert( Path.has_rail( p5, _GET_rail( 6,1 ) ) )
 	assert( not Path.has_rail( p5, _GET_rail( 6,4 ) ) )
+
+	Path.set_early_finish( p5, _GET_rail(8,4) )
+	assert( Path.str( p5 ) == "|2;1;E|  ->  |6;1;E|  ->  |8;4|  : 9", "result was:" .. Path.str( p5 ) )
+
+	local p6 = Path.new( _GET_rail(7,1) )
+	Path.append( p6, _GET_dir(7,1,"W") )
+	Path.append( p6, _GET_dir(6,1,"W") )
+	Path.append( p6, _GET_dir(2,1,"W") )
+	assert( Path.str(p6) == "|7;1;W|  ->  |6;1;W|  ->  |2;1;W|  ->  |2;1|  : 7", Path.str(p6) )
+	Path.set_early_finish( p6, _GET_rail(1,1) )
+	-- assert( Path.str(p6) == "|7;1;W|  ->  |6;1;W|  ->  |2;1;W|  ->  |1;1|  : 6", Path.str(p6) )
 end
 Path.test()

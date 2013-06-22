@@ -104,3 +104,6 @@ dofile "../pathfind/path_set.lua"
 dofile "../pathfind/path_find.lua"
 
 
+
+
+Dir.test()

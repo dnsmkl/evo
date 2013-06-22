@@ -68,11 +68,59 @@ function Dir.calc_next_junction( dir )
 		dir.next_junction = next_rail
 	elseif next_rail.direction_count == 1 then
 		dir.next_junction = dir.parent_rail
+		dir.dist_junction = dir.dist_junction * 2 -- at the moment only half distance was walked
 	else
 		error("Dir.calc_next_junction:next_rail.direction_count == 2")
 	end
 end
 
+function Dir.get_distance( dir, target_rail )
+	assert( Dir.has_rail( dir, target_rail ) )
+
+	local current_rail = dir.parent_rail
+	local current_dir = dir.str
+	local next_rail = dir.next_rail
+
+	local result_distance = 0
+
+
+	while next_rail.direction_count == 2 do -- until junction or deadend
+		current_rail, current_dir, next_rail = Dir._walk_to_next( current_rail, current_dir, next_rail )
+		result_distance = result_distance  + 1
+		if current_rail == target_rail then
+			return result_distance
+		end
+	end
+
+	if next_rail == target_rail then
+		return result_distance  + 1
+	end
+
+	return result_distance
+end
+
+function Dir.has_rail( dir, target_rail )
+	local current_rail = dir.parent_rail
+	local current_dir = dir.str
+	local next_rail = dir.next_rail
+
+	while 1==1 do
+		if current_rail == target_rail then
+			return true
+		end
+
+		if next_rail.direction_count == 1 then
+			return next_rail == target_rail
+		end
+
+		current_rail, current_dir, next_rail = Dir._walk_to_next( current_rail, current_dir, next_rail )
+		if current_rail.direction_count > 2 then
+			return false
+		end
+	end
+
+	return false
+end
 
 function Dir._walk_to_next( current_rail, current_dirstr, next_rail )
 
@@ -96,6 +144,20 @@ function Dir._walk_to_next( current_rail, current_dirstr, next_rail )
 	return new_current, new_current_dir_str, new_next_rail
 end
 
+
+function Dir.test()
+	local f21t31 = Dir.get_distance( _GET_dir(2,1,"E"), _GET_rail(3,1) )
+	assert( f21t31 == 1, "was:" .. f21t31 )
+
+	local f21t11 = Dir.get_distance( _GET_dir(2,1,"W"), _GET_rail(1,1) )
+	assert( f21t11 == 1, "was:" .. f21t11 )
+
+	assert( _GET_dir(2,1,"W").dist_junction == 2 )
+
+	assert( Dir.has_rail( _GET_dir(2,1,"E"), _GET_rail(5,1) ) )
+	assert( Dir.has_rail( _GET_dir(2,1,"W"), _GET_rail(1,1) ) )
+	assert( not Dir.has_rail( _GET_dir(2,1,"E"), _GET_rail(8,1) ) )
+end
 
 
 

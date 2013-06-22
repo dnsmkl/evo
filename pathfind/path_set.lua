@@ -29,9 +29,7 @@ end
 
 
 function PathSet.test()
-	print "Path Set test:"
-
-
+	-- print "Path Set test:"
 	local p1 = Path.new( _GET_rail( 1,1 ) )
 	Path.append( p1 , _GET_dir(1,1,"E") )
 	Path.append( p1 , _GET_dir(2,1,"E") )
