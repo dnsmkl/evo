@@ -32,6 +32,7 @@ function Path.set_early_finish( path, dest_rail )
 
 	path.distance = path.distance - final_dir.dist_junction -- remove final road till junction
 	path.distance = path.distance + Dir.get_distance( final_dir, dest_rail ) -- append only part till dest_rail
+
 	path.destination = dest_rail
 end
 
@@ -86,7 +87,7 @@ function Path.eq( patha, pathb )
 end
 
 
-function Path.has_rail( path, rail )
+function Path.has_junction( path, rail )
 	for _,dir in pairs( path.dirs ) do
 		if rail == dir.parent_rail then
 			return true
@@ -136,9 +137,9 @@ function Path.test()
 	assert( Path.str( p4 ) == "|2;1;E|  ->  |6;1|  : 4" )
 	assert( Path.str( p5 ) == "|2;1;E|  ->  |6;1;E|  ->  |6;3|  : 12", "result was:" .. Path.str( p5 ) )
 	-- TEST Path.has_rail
-	assert( Path.has_rail( p5, _GET_rail( 2,1 ) ) )
-	assert( Path.has_rail( p5, _GET_rail( 6,1 ) ) )
-	assert( not Path.has_rail( p5, _GET_rail( 6,4 ) ) )
+	assert( Path.has_junction( p5, _GET_rail( 2,1 ) ) )
+	assert( Path.has_junction( p5, _GET_rail( 6,1 ) ) )
+	assert( not Path.has_junction( p5, _GET_rail( 6,4 ) ) )
 
 	Path.set_early_finish( p5, _GET_rail(8,4) )
 	assert( Path.str( p5 ) == "|2;1;E|  ->  |6;1;E|  ->  |8;4|  : 9", "result was:" .. Path.str( p5 ) )

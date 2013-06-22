@@ -71,7 +71,7 @@ function PathFind._append_open_set( open_set, closed_set, newest_path_in_closed_
 	-- From all possible new directions take only "new" (destination not covered by closed_set )
 	-- path -> destination -> directions
 	local dir_junction_not_in_path_set = function( dir )
-		return not PathSet.has_rail( closed_set, dir.next_junction )
+		return not PathSet.has_junction( closed_set, dir.next_junction )
 	end
 	local new_dirs = Fn.filter(
 			newest_path_in_closed_set.destination.directions
