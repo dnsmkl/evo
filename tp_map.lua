@@ -15,7 +15,7 @@ function print_originaly_structured_map(map)
 			end
 		end
 	end
-	for i = 1, #str do
+	for i = 1,#str do
 		print(str[i])
 	end
 end

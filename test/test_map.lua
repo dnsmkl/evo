@@ -38,9 +38,9 @@ end
 trp_mock.map =
 	transpose_map({
 		 {"C","C","C","C","C","C","C","C"}
-		,{nil,"C",nil,"C",nil,"C",nil,"C"}
-		,{nil,"C",nil,"C",nil,"C",nil,"C"}
-		,{"C","C","C","C","C","C","C","C"}
+		,{nil,"C",nil,nil,nil,"C",nil,"C"}
+		,{nil,"C",nil,"C","C","C",nil,"C"}
+		,{"C","C","C","C",nil,"C","C","C"}
 		,height = 4
 		,width = 8
 	})
