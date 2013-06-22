@@ -82,14 +82,13 @@ function PathFind.test()
 	local manualy_built_path = Path.new( rail_21 )
 
 	local pf_same = PathFind.junction_find( rail_21, rail_21 )
-	assert( Path.eq( pf_same, manualy_built_path)  ,"path from rail to rail it self " )
+	assert( Path.str( pf_same ) == "|2;1|  : 0" )
 
-	Path.append( manualy_built_path, _GET_dir(2,1,"E") )
 	local pf_next_junction = PathFind.junction_find( rail_21, _GET_rail(6,1) )
-	assert( Path.eq( manualy_built_path, pf_next_junction ) ,"shortest path to next junction is incorrect" )
+	assert( Path.str( pf_next_junction ) == "|2;1;E|  ->  |6;1|  : 4","shortest path to next junction is incorrect" )
 
-	-- print( Path.str(PathFind.junction_find( _GET_rail(2,1), _GET_rail(6,4) )) )
-	assert( PathFind.junction_find( _GET_rail(2,1), _GET_rail(6,3) ).distance == 6 , "resulting paths distance is incorrect")
+	local pf_further_junction = PathFind.junction_find( _GET_rail(2,1), _GET_rail(6,3) )
+	assert( Path.str( pf_further_junction ) == "|2;1;E|  ->  |6;1;S|  ->  |6;3|  : 6", "was calculated:" .. Path.str( pf_further_junction ) )
 
 end
 
